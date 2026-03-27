@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Career.ai Clickable Prototype</title>
+  <style>
+    :root {
+      --gold: #C8963E;
+      --navy: #1a2332;
+      --cream: #faf7f2;
+      --green: #4CAF50;
+      --card: #ffffff;
+      --text: #1f2430;
+      --muted: #6a7080;
+      --shadow: 0 8px 24px rgba(26, 35, 50, 0.08);
+      --radius: 12px;
+      --space-1: 8px;
+      --space-2: 16px;
+      --space-3: 24px;
+      --space-4: 32px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(circle at top right, #f7e9cb 0%, var(--cream) 35%, #f1ede5 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: var(--space-3);
+    }
+
+    .device-frame {
+      width: min(390px, 100%);
+      min-height: 780px;
+      background: var(--cream);
+      border-radius: 28px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+      border: 8px solid #111;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-wrap {
+      height: 8px;
+      background: #ecdcc0;
+      width: 100%;
+    }
+
+    .progress {
+      height: 100%;
+      background: linear-gradient(90deg, #d8a74f, var(--gold));
+      width: 12.5%;
+      transition: width 300ms ease;
+    }
+
+    .screen-container {
+      display: flex;
+      width: 800%;
+      transition: transform 360ms cubic-bezier(.3,.7,.4,1);
+      height: calc(100% - 8px);
+    }
+
+    .screen {
+      width: 12.5%;
+      padding: var(--space-4) var(--space-3) calc(var(--space-4) + 24px);
+      overflow-y: auto;
+      max-height: calc(780px - 8px);
+      opacity: 0.6;
+      transform: translateX(16px);
+      transition: opacity 240ms ease, transform 240ms ease;
+    }
+
+    .screen.active {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    h1, h2, h3 {
+      margin: 0 0 var(--space-2);
+      color: var(--navy);
+      line-height: 1.2;
+    }
+
+    p { margin: 0 0 var(--space-2); color: #2f3543; line-height: 1.5; }
+    .muted { color: var(--muted); font-size: 0.95rem; }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: var(--space-2);
+      box-shadow: var(--shadow);
+      margin-bottom: var(--space-2);
+    }
+
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 14px 16px;
+      width: 100%;
+      font-size: 0.98rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 120ms ease, filter 120ms ease;
+      margin-bottom: 10px;
+    }
+
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: var(--gold); color: #fff; }
+    .btn-secondary { background: var(--navy); color: #fff; }
+    .btn-ghost { background: #fff; color: #2f3543; border: 1px solid #d4d9e3; }
+    .btn-outline-gold { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
+
+    .auth-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: 700;
+    }
+
+    .email-form {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 320ms ease, opacity 240ms ease;
+    }
+
+    .email-form.open { max-height: 220px; opacity: 1; }
+
+    label {
+      font-size: 0.86rem;
+      color: #364055;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid #d5dbe7;
+      border-radius: 10px;
+      background: #fff;
+      padding: 11px 12px;
+      font: inherit;
+      margin-bottom: 12px;
+    }
+
+    textarea { min-height: 88px; resize: vertical; }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .statement {
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed #e2dfd8;
+    }
+
+    .scale {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0,1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .scale button {
+      border: 1px solid #d8d4cb;
+      background: #fff;
+      border-radius: 999px;
+      padding: 8px 0;
+      font-weight: 700;
+      color: #444;
+      cursor: pointer;
+    }
+
+    .scale button.selected {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #fff;
+    }
+
+    .moment {
+      border: 1px solid #e7e2d7;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      background: #fffefa;
+    }
+
+    .value-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .value-card {
+      border: 1px solid #d5d7df;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #2f3543;
+    }
+
+    .value-card.selected {
+      background: #f8edd8;
+      border-color: var(--gold);
+      color: #7a5715;
+    }
+
+    .kicker {
+      display: inline-block;
+      background: #f6e9cf;
+      color: #7e5c20;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .story-category h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      background: #eef2f7;
+      color: #41506a;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      margin: 0 6px 6px 0;
+    }
+
+    .bar-row { margin-bottom: 12px; }
+    .bar {
+      background: #e6e2da;
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .bar > span { display: block; height: 100%; background: var(--gold); }
+    .bar.post > span { background: var(--green); }
+
+    .footer-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 430px) {
+      body { padding: 0; }
+      .device-frame {
+        width: 100%;
+        min-height: 100vh;
+        border-radius: 0;
+        border: none;
+      }
+      .screen { max-height: calc(100vh - 8px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="device-frame">
+    <div class="progress-wrap"><div class="progress" id="progress"></div></div>
+    <div class="screen-container" id="screenContainer">
+
+      <section class="screen active" data-screen="1">
+        <div class="kicker">Welcome to Career.ai</div>
+        <h1>Own your story. Step into interviews with confidence.</h1>
+        <p class="muted">You’re doing great already — let’s turn your experiences into a narrative you can feel proud of.</p>
+        <div class="card" style="background:linear-gradient(135deg,#f7ead0,#f2e6d5);">
+          <p style="margin:0;font-weight:600;color:#6d5629;">✨ Build your storybank • clarify your strengths • practice your answer</p>
+        </div>
+
+        <button class="btn auth-btn btn-ghost" id="googleBtn" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.5 3.8-5.5 3.8-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.2.8 3.9 1.5l2.7-2.6C16.9 3.4 14.7 2.5 12 2.5A9.5 9.5 0 0 0 2.5 12 9.5 9.5 0 0 0 12 21.5c5.5 0 9.2-3.8 9.2-9.2 0-.6-.1-1.1-.2-1.6z"/></svg>
+          Continue with Google
+        </button>
+        <button class="btn auth-btn" id="appleBtn" type="button" style="background:#111;color:#fff;">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.7 12.8c0-2.4 2-3.5 2-3.6-1.1-1.6-2.7-1.8-3.3-1.8-1.4-.1-2.7.8-3.4.8-.7 0-1.8-.8-2.9-.8-1.5 0-2.8.9-3.6 2.2-1.5 2.6-.4 6.4 1.1 8.5.7 1 1.5 2 2.6 2 .9 0 1.3-.6 2.5-.6s1.6.6 2.5.6c1.1 0 1.8-1 2.5-2 .8-1.1 1.1-2.2 1.1-2.2-.1 0-2.1-.8-2.1-3.1zM14.4 6.1c.6-.8 1-1.9.9-3-.9 0-2 .6-2.7 1.4-.6.7-1.1 1.8-.9 2.9 1 .1 2-.5 2.7-1.3z"/></svg>
+          Continue with Apple
+        </button>
+        <button class="btn auth-btn btn-outline-gold" id="emailToggleBtn" type="button">Continue with Email</button>
+
+        <div class="email-form" id="emailFormWrap">
+          <div class="card">
+            <label for="signupName">Name</label>
+            <input id="signupName" type="text" placeholder="e.g., Maya Thompson" />
+            <label for="signupEmail">Email</label>
+            <input id="signupEmail" type="email" placeholder="e.g., maya@email.com" />
+            <button class="btn btn-primary" type="button" id="emailStartBtn">Get Started</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="2">
+        <div class="kicker">Step 1 of 7</div>
+        <h2>Confidence Check-In</h2>
+        <p class="muted">Quick baseline (1 = low confidence, 5 = very confident).</p>
+        <div id="preAssessment"></div>
+        <div class="footer-nav">
+          <button class="btn btn-primary" data-next="3">Continue</button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="3">
+        <div class="kicker">Greatest Impact</div>
+        <h2>Moments where you made a difference</h2>
+        <p>“A key part of the coaching process is to get clear on what impact you want to have…”</p>
+        <p class="muted">Write about a moment where you impacted others for the better.</p>
+        <div id="impactMoments"></div>
+        <button class="btn btn-outline-gold" id="addImpactMoment" type="button">Add another moment</button>
+        <div class="footer-nav">
+          <button class="btn btn-secondary" data-prev="2">Back</button>
+          <button class="btn btn-primary" data-next="4">Continue</button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="4">
+        <div class="kicker">Cookie Jar Exercise</div>
+        <h2>Proof you’re stronger than you think</h2>
+        <p>What have you been through where you’re stronger than you give yourself credit?</p>
+        <div id="cookieJarMoments"></div>
+        <div class="footer-nav">
+          <button class="btn btn-secondary" data-prev="3">Back</button>
+          <button class="btn btn-primary" data-next="5">Continue</button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="5">
+        <div class="kicker">Zone of Genius</div>
+        <h2>Find your superpower</h2>
+        <p class="muted">Answer these prompts as self-reflection.</p>
+        <div id="zogQuestions"></div>
+        <div class="footer-nav">
+          <button class="btn btn-secondary" data-prev="4">Back</button>
+          <button class="btn btn-primary" data-next="6">Continue</button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="6">
+        <div class="kicker">Values Assessment</div>
+        <h2>What matters most to you</h2>
+        <div class="card">
+          <label for="highestVersion">Highest Version Exercise</label>
+          <textarea id="highestVersion" placeholder="Describe a peak flow experience: qualities, behaviors, impact..."></textarea>
+        </div>
+        <div class="card">
+          <p style="font-weight:700;margin-bottom:8px;">Select your top 5 core values</p>
+          <div class="value-grid" id="valueGrid"></div>
+          <p class="muted" id="valueCount">0 selected</p>
+        </div>
+        <div class="card">
+          <label for="roleModels">Role models reflection</label>
+          <textarea id="roleModels" placeholder="Who do you respect enormously and why?"></textarea>
+        </div>
+        <div class="footer-nav">
+          <button class="btn btn-secondary" data-prev="5">Back</button>
+          <button class="btn btn-primary" data-next="7">Continue</button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="7">
+        <div class="kicker">Storybank + Best Self Portrait</div>
+        <h2>Your career storybank</h2>
+        <p class="muted">This is powerful stuff — your stories are taking shape.</p>
+        <div id="storybank"></div>
+        <div class="card">
+          <h3>Best Self Portrait</h3>
+          <p id="bestSelf"></p>
+        </div>
+        <div class="footer-nav">
+          <button class="btn btn-secondary" data-prev="6">Back</button>
+          <button class="btn btn-primary" data-next="8">Continue</button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="8">
+        <div class="kicker">Mock Interview + Final Reflection</div>
+        <h2>Practice + Post-Assessment</h2>
+        <div class="card">
+          <p><strong>Interview Question:</strong> Tell me about a time you overcame a challenge.</p>
+          <p class="muted" id="suggestedStory">Suggested story: —</p>
+          <button class="btn btn-primary" id="practiceBtn" type="button">Practice my answer</button>
+          <div class="card hidden" id="starAnswer" style="margin-top:12px;background:#fdfcf8;">
+            <p><strong>STAR Draft:</strong></p>
+            <p id="starText"></p>
+            <p style="margin-top:10px;color:#2f6b36;"><strong>AI Feedback:</strong> Strong opening — consider adding one concrete metric to sharpen impact.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Post confidence check-in</h3>
+          <div id="postAssessment"></div>
+        </div>
+
+        <div class="card">
+          <h3>Before vs. After</h3>
+          <div id="comparison"></div>
+        </div>
+
+        <div class="card">
+          <label for="willingness">Would you pay $9.99/month for this?</label>
+          <select id="willingness">
+            <option value="">Choose one</option>
+            <option>Yes</option>
+            <option>Maybe</option>
+            <option>No</option>
+          </select>
+          <label for="nps">How likely are you to recommend to a friend? (1-10)</label>
+          <select id="nps"></select>
+          <label for="clarity">I now have a clearer understanding of my strengths and career direction.</label>
+          <select id="clarity">
+            <option value="">Choose one</option>
+            <option>Strongly Disagree</option>
+            <option>Disagree</option>
+            <option>Neutral</option>
+            <option>Agree</option>
+            <option>Strongly Agree</option>
+          </select>
+          <button class="btn btn-primary" id="finishBtn" type="button">Save my prototype responses</button>
+          <p class="muted" id="finishMsg"></p>
+        </div>
+
+        <div class="footer-nav">
+          <button class="btn btn-secondary" data-prev="7">Back</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "career_ai_prototype_v1";
+
+    const confidenceStatements = [
+      "I can clearly describe my strengths to an employer",
+      "I feel prepared to answer interview questions",
+      "I have a clear understanding of my career direction",
+      "I could confidently negotiate a job offer"
+    ];
+
+    const valueOptions = [
+      "Excellence", "Helping Others", "Creativity", "Meaningful Work", "Integrity",
+      "Growth", "Leadership", "Curiosity", "Independence", "Collaboration",
+      "Adventure", "Compassion", "Justice", "Humor", "Family",
+      "Health", "Security", "Recognition", "Community", "Authenticity"
+    ];
+
+    const zogPrompts = [
+      "What are three qualities people consistently see in you?",
+      "When have others seen you at your best? What were you doing?",
+      "What do you do exceptionally well or better than most people?",
+      "What energizes you or puts you in the zone?",
+      "If someone had to describe your superpower, what would it be?",
+      "When have you made a meaningful impact on others?"
+    ];
+
+    const defaultState = {
+      currentScreen: 1,
+      user: { name: "", email: "" },
+      pre: [3,3,3,3],
+      post: [4,4,4,4],
+      impactMoments: [
+        {
+          impact: "I organized a weekend tutoring group that helped first-year students pass calculus.",
+          who: "12 students who were close to failing the class.",
+          meaningful: "I watched confidence return in real time.",
+          strengths: "Leadership, empathy, and simplifying complex concepts."
+        }
+      ],
+      cookieJar: [
+        "Ran a half marathon while recovering from an ankle injury and still finished strong.",
+        "Applied for internships after multiple rejections and finally secured one through persistence.",
+        "Balanced school, work, and family responsibilities during a difficult semester."
+      ],
+      zog: zogPrompts.map(() => ""),
+      highestVersion: "",
+      selectedValues: ["Growth", "Integrity", "Meaningful Work"],
+      roleModels: "",
+      willingness: "",
+      nps: "",
+      clarity: ""
+    };
+
+    let state = loadState();
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? { ...defaultState, ...JSON.parse(raw) } : { ...defaultState };
+      } catch (e) {
+        return { ...defaultState };
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function clampScreen(n) {
+      return Math.max(1, Math.min(8, n));
+    }
+
+    function goToScreen(n) {
+      state.currentScreen = clampScreen(n);
+      const index = state.currentScreen - 1;
+      document.getElementById("screenContainer").style.transform = `translateX(-${index * 12.5}%)`;
+      document.querySelectorAll(".screen").forEach((el, i) => {
+        el.classList.toggle("active", i === index);
+      });
+      document.getElementById("progress").style.width = `${(state.currentScreen / 8) * 100}%`;
+      saveState();
+      if (state.currentScreen === 7 || state.currentScreen === 8) {
+        renderStorybank();
+        renderBestSelf();
+      }
+      if (state.currentScreen === 8) {
+        renderComparison();
+        populateSuggestedStory();
+      }
+    }
+
+    function createScale(name, values, onPick) {
+      const wrap = document.createElement("div");
+      wrap.className = "scale";
+      for (let i = 1; i <= 5; i++) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = i;
+        if (values === i) btn.classList.add("selected");
+        btn.addEventListener("click", () => onPick(i));
+        wrap.appendChild(btn);
+      }
+      return wrap;
+    }
+
+    function renderAssessment(containerId, arrName) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = "";
+      confidenceStatements.forEach((s, idx) => {
+        const block = document.createElement("div");
+        block.className = "statement";
+        const label = document.createElement("p");
+        label.textContent = s;
+        label.style.marginBottom = "6px";
+        block.appendChild(label);
+        block.appendChild(createScale(containerId + idx, state[arrName][idx], (val) => {
+          state[arrName][idx] = val;
+          saveState();
+          renderAssessment(containerId, arrName);
+          if (arrName === "post") renderComparison();
+        }));
+        container.appendChild(block);
+      });
+    }
+
+    function renderImpactMoments() {
+      const wrap = document.getElementById("impactMoments");
+      wrap.innerHTML = "";
+      state.impactMoments.forEach((m, i) => {
+        const card = document.createElement("div");
+        card.className = "moment";
+        card.innerHTML = `
+          <p style="font-weight:700;margin-bottom:8px;">Moment ${i + 1}</p>
+          <label>What was the impact?</label>
+          <textarea data-k="impact" data-i="${i}" placeholder="Led a peer workshop that increased confidence and grades...">${m.impact || ""}</textarea>
+          <label>Who was impacted?</label>
+          <textarea data-k="who" data-i="${i}" placeholder="Classmates, team members, younger students...">${m.who || ""}</textarea>
+          <label>Why was it meaningful?</label>
+          <textarea data-k="meaningful" data-i="${i}" placeholder="I saw people believe in themselves again...">${m.meaningful || ""}</textarea>
+          <label>What strengths showed up?</label>
+          <textarea data-k="strengths" data-i="${i}" placeholder="Empathy, communication, strategy, resilience...">${m.strengths || ""}</textarea>
+        `;
+        wrap.appendChild(card);
+      });
+
+      wrap.querySelectorAll("textarea").forEach((ta) => {
+        ta.addEventListener("input", (e) => {
+          const i = +e.target.dataset.i;
+          const k = e.target.dataset.k;
+          state.impactMoments[i][k] = e.target.value;
+          saveState();
+        });
+      });
+    }
+
+    function renderCookieJar() {
+      const wrap = document.getElementById("cookieJarMoments");
+      wrap.innerHTML = "";
+      const placeholders = [
+        "Overcame pain or adversity...",
+        "Deep effort & perseverance...",
+        "Got back up after life knocked you down..."
+      ];
+      for (let i = 0; i < 3; i++) {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <label>Moment ${i + 1}</label>
+          <textarea data-i="${i}" placeholder="${placeholders[i]}">${state.cookieJar[i] || ""}</textarea>
+        `;
+        wrap.appendChild(card);
+      }
+      wrap.querySelectorAll("textarea").forEach((ta) => {
+        ta.addEventListener("input", (e) => {
+          state.cookieJar[+e.target.dataset.i] = e.target.value;
+          saveState();
+        });
+      });
+    }
+
+    function renderZog() {
+      const wrap = document.getElementById("zogQuestions");
+      wrap.innerHTML = "";
+      zogPrompts.forEach((q, i) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <label>${q}</label>
+          <textarea data-i="${i}" placeholder="Reflect here..."></textarea>
+        `;
+        const ta = card.querySelector("textarea");
+        ta.value = state.zog[i] || "";
+        ta.addEventListener("input", (e) => {
+          state.zog[i] = e.target.value;
+          saveState();
+        });
+        wrap.appendChild(card);
+      });
+    }
+
+    function renderValues() {
+      const grid = document.getElementById("valueGrid");
+      grid.innerHTML = "";
+      valueOptions.forEach((v) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "value-card" + (state.selectedValues.includes(v) ? " selected" : "");
+        btn.textContent = v;
+        btn.addEventListener("click", () => {
+          const has = state.selectedValues.includes(v);
+          if (has) {
+            state.selectedValues = state.selectedValues.filter((x) => x !== v);
+          } else {
+            if (state.selectedValues.length >= 5) return;
+            state.selectedValues.push(v);
+          }
+          document.getElementById("valueCount").textContent = `${state.selectedValues.length} selected`;
+          saveState();
+          renderValues();
+        });
+        grid.appendChild(btn);
+      });
+      document.getElementById("valueCount").textContent = `${state.selectedValues.length} selected`;
+    }
+
+    function categorize(text) {
+      const t = text.toLowerCase();
+      if (/led|mentor|taught|organized|impact/.test(t)) return "Leadership & Impact";
+      if (/challenge|injury|rejection|adversity|persever/.test(t)) return "Resilience & Grit";
+      if (/code|analy|build|problem|data|system/.test(t)) return "Technical & Problem-Solving";
+      return "Collaboration & Empathy";
+    }
+
+    function renderStorybank() {
+      const out = document.getElementById("storybank");
+      if (!out) return;
+      const categories = {
+        "Leadership & Impact": [],
+        "Resilience & Grit": [],
+        "Technical & Problem-Solving": [],
+        "Collaboration & Empathy": []
+      };
+
+      const sources = [
+        ...state.impactMoments.map((m) => `${m.impact} ${m.who} ${m.meaningful} ${m.strengths}`),
+        ...state.cookieJar,
+        ...state.zog,
+        state.highestVersion,
+        state.roleModels
+      ].filter(Boolean);
+
+      sources.forEach((s) => categories[categorize(s)].push(s));
+
+      out.innerHTML = "";
+      Object.entries(categories).forEach(([cat, items]) => {
+        const card = document.createElement("div");
+        card.className = "card story-category";
+        const list = items.length
+          ? items.slice(0, 3).map((item) => `<div class='chip'>${item.slice(0, 80)}${item.length > 80 ? "…" : ""}</div>`).join("")
+          : "<p class='muted'>Add more reflections to populate this theme.</p>";
+        card.innerHTML = `<h3>${cat}</h3>${list}`;
+        out.appendChild(card);
+      });
+    }
+
+    function renderBestSelf() {
+      const el = document.getElementById("bestSelf");
+      if (!el) return;
+      const essence = state.selectedValues.length ? state.selectedValues.slice(0,3).join(", ") : "integrity and growth";
+      const conditions = state.highestVersion || "there is trust, challenge, and room to learn quickly";
+      const impactSource = (state.impactMoments[0] && state.impactMoments[0].impact) || "helping others unlock confidence and momentum";
+      el.textContent = `At my best, I am someone who embodies ${essence}. I thrive in environments where ${conditions.toLowerCase()}. I bring value by ${impactSource.toLowerCase()}.`;
+    }
+
+    function renderComparison() {
+      const wrap = document.getElementById("comparison");
+      if (!wrap) return;
+      wrap.innerHTML = "";
+      confidenceStatements.forEach((s, i) => {
+        const row = document.createElement("div");
+        row.className = "bar-row";
+        row.innerHTML = `
+          <p style="margin-bottom:4px;">${s}</p>
+          <div class="muted">Before: ${state.pre[i]} / 5</div>
+          <div class="bar"><span style="width:${(state.pre[i] / 5) * 100}%"></span></div>
+          <div class="muted" style="margin-top:6px;">After: ${state.post[i]} / 5</div>
+          <div class="bar post"><span style="width:${(state.post[i] / 5) * 100}%"></span></div>
+        `;
+        wrap.appendChild(row);
+      });
+    }
+
+    function populateSuggestedStory() {
+      const suggestion = document.getElementById("suggestedStory");
+      const first = state.cookieJar.find(Boolean) || (state.impactMoments[0] && state.impactMoments[0].impact) || "your resilience story";
+      suggestion.textContent = `Suggested story: ${first}`;
+    }
+
+    function initStaticInputs() {
+      const hv = document.getElementById("highestVersion");
+      hv.value = state.highestVersion;
+      hv.addEventListener("input", (e) => {
+        state.highestVersion = e.target.value;
+        saveState();
+      });
+
+      const rm = document.getElementById("roleModels");
+      rm.value = state.roleModels;
+      rm.addEventListener("input", (e) => {
+        state.roleModels = e.target.value;
+        saveState();
+      });
+
+      const willingness = document.getElementById("willingness");
+      willingness.value = state.willingness;
+      willingness.addEventListener("change", (e) => {
+        state.willingness = e.target.value;
+        saveState();
+      });
+
+      const nps = document.getElementById("nps");
+      for (let i = 1; i <= 10; i++) {
+        const opt = document.createElement("option");
+        opt.value = String(i);
+        opt.textContent = String(i);
+        nps.appendChild(opt);
+      }
+      nps.value = state.nps;
+      nps.addEventListener("change", (e) => {
+        state.nps = e.target.value;
+        saveState();
+      });
+
+      const clarity = document.getElementById("clarity");
+      clarity.value = state.clarity;
+      clarity.addEventListener("change", (e) => {
+        state.clarity = e.target.value;
+        saveState();
+      });
+    }
+
+    function initAuth() {
+      document.getElementById("googleBtn").addEventListener("click", () => {
+        state.user = { name: "Demo User", email: "demo.google@career.ai" };
+        saveState();
+        goToScreen(2);
+      });
+
+      document.getElementById("appleBtn").addEventListener("click", () => {
+        state.user = { name: "Demo User", email: "demo.apple@career.ai" };
+        saveState();
+        goToScreen(2);
+      });
+
+      const emailWrap = document.getElementById("emailFormWrap");
+      document.getElementById("emailToggleBtn").addEventListener("click", () => {
+        emailWrap.classList.toggle("open");
+      });
+
+      document.getElementById("emailStartBtn").addEventListener("click", () => {
+        const name = document.getElementById("signupName").value.trim() || "Demo User";
+        const email = document.getElementById("signupEmail").value.trim() || "demo@email.com";
+        state.user = { name, email };
+        saveState();
+        goToScreen(2);
+      });
+    }
+
+    function initNav() {
+      document.querySelectorAll("[data-next]").forEach((btn) => {
+        btn.addEventListener("click", () => goToScreen(+btn.dataset.next));
+      });
+      document.querySelectorAll("[data-prev]").forEach((btn) => {
+        btn.addEventListener("click", () => goToScreen(+btn.dataset.prev));
+      });
+    }
+
+    function initActions() {
+      document.getElementById("addImpactMoment").addEventListener("click", () => {
+        if (state.impactMoments.length >= 3) return;
+        state.impactMoments.push({ impact: "", who: "", meaningful: "", strengths: "" });
+        saveState();
+        renderImpactMoments();
+      });
+
+      document.getElementById("practiceBtn").addEventListener("click", () => {
+        const story = state.cookieJar.find(Boolean) || state.impactMoments[0]?.impact || "I faced a challenge and worked through it with persistence.";
+        document.getElementById("starText").textContent = `Situation: ${story} Task: I needed to stay focused and deliver. Action: I broke the problem into steps, asked for feedback, and kept showing up. Result: I grew my confidence and produced a measurable positive outcome.`;
+        document.getElementById("starAnswer").classList.remove("hidden");
+      });
+
+      document.getElementById("finishBtn").addEventListener("click", () => {
+        saveState();
+        document.getElementById("finishMsg").textContent = "Saved! Thank you — your prototype responses are stored locally on this device.";
+      });
+    }
+
+    function boot() {
+      initAuth();
+      initNav();
+      initActions();
+      initStaticInputs();
+      renderAssessment("preAssessment", "pre");
+      renderAssessment("postAssessment", "post");
+      renderImpactMoments();
+      renderCookieJar();
+      renderZog();
+      renderValues();
+      goToScreen(state.currentScreen || 1);
+    }
+
+    boot();
+  </script>
+</body>
+</html>
