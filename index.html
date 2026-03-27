@@ -321,6 +321,7 @@
         <p class="muted">Quick baseline (1 = low confidence, 5 = very confident).</p>
         <div id="preAssessment"></div>
         <div class="footer-nav">
+          <button class="btn btn-secondary" data-prev="1">Back</button>
           <button class="btn btn-primary" data-next="3">Continue</button>
         </div>
       </section>
@@ -510,14 +511,18 @@
     function loadState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        return raw ? { ...defaultState, ...JSON.parse(raw) } : { ...defaultState };
+        if (!raw) return { ...defaultState };
+        const parsed = JSON.parse(raw);
+        const { currentScreen: _ignoredCurrentScreen, ...savedState } = parsed;
+        return { ...defaultState, ...savedState, currentScreen: 1 };
       } catch (e) {
         return { ...defaultState };
       }
     }
 
     function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      const { currentScreen: _ignoredCurrentScreen, ...persistedState } = state;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(persistedState));
     }
 
     function clampScreen(n) {
@@ -860,7 +865,7 @@
       renderCookieJar();
       renderZog();
       renderValues();
-      goToScreen(state.currentScreen || 1);
+      goToScreen(1);
     }
 
     boot();
