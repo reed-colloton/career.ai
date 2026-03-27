@@ -10,6 +10,7 @@
       --navy: #1a2332;
       --cream: #faf7f2;
       --green: #4CAF50;
+      --screen-count: 9;
       --card: #ffffff;
       --text: #1f2430;
       --muted: #6a7080;
@@ -60,13 +61,13 @@
 
     .screen-container {
       display: flex;
-      width: 800%;
+      width: calc(var(--screen-count) * 100%);
       transition: transform 360ms cubic-bezier(.3,.7,.4,1);
       height: calc(100% - 8px);
     }
 
     .screen {
-      width: 12.5%;
+      width: calc(100% / var(--screen-count));
       padding: var(--space-4) var(--space-3) calc(var(--space-4) + 24px);
       overflow-y: auto;
       max-height: calc(780px - 8px);
@@ -267,6 +268,156 @@
       margin-top: 16px;
     }
 
+    .home-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .home-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--gold), #e0b86e 80%);
+      color: #fff;
+      font-weight: 800;
+      box-shadow: var(--shadow);
+      flex-shrink: 0;
+    }
+
+    .home-hero {
+      background: linear-gradient(145deg, #1d293c, #30425f 65%, #b68433 140%);
+      color: #fff;
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 18px 40px rgba(26, 35, 50, 0.18);
+      margin-bottom: 18px;
+    }
+
+    .home-hero h3,
+    .home-hero p {
+      color: #fff;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .stat-tile {
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 16px;
+      padding: 12px;
+      min-height: 78px;
+    }
+
+    .stat-tile strong {
+      display: block;
+      font-size: 1.32rem;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+
+    .stat-tile span {
+      display: block;
+      color: rgba(255, 255, 255, 0.84);
+      font-size: 0.82rem;
+      line-height: 1.3;
+    }
+
+    .home-section-title {
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #687287;
+      font-weight: 800;
+      margin: 18px 0 10px;
+    }
+
+    .quick-action {
+      border: 1px solid #e8dfd0;
+      border-radius: 16px;
+      padding: 14px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+
+    .quick-action h3 {
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+
+    .quick-action p {
+      font-size: 0.92rem;
+      margin-bottom: 12px;
+    }
+
+    .home-actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    .home-actions .btn {
+      margin-bottom: 0;
+    }
+
+    .theme-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .theme-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      background: #f2eadb;
+      color: #6f5420;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .mini-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .mini-item {
+      padding: 12px;
+      border: 1px solid #ebe6dc;
+      border-radius: 14px;
+      background: #fffdf8;
+      box-shadow: var(--shadow);
+    }
+
+    .mini-item strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--navy);
+    }
+
     .hidden { display: none !important; }
 
     @media (max-width: 430px) {
@@ -447,6 +598,67 @@
 
         <div class="footer-nav">
           <button class="btn btn-secondary" data-prev="7">Back</button>
+          <button class="btn btn-primary" data-next="9">Enter Home</button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="9">
+        <div class="home-topbar">
+          <div>
+            <div class="kicker">Career.ai Home</div>
+            <h2 id="homeGreeting">Welcome back</h2>
+            <p class="muted" id="homeSubhead">Your onboarding reflections are organized and ready to use.</p>
+          </div>
+          <div class="home-avatar" id="homeAvatar">DU</div>
+        </div>
+
+        <div class="home-hero">
+          <div class="hero-eyebrow">After onboarding</div>
+          <h3 id="homeHeroTitle">You have momentum.</h3>
+          <p id="homeHeroCopy">Your storybank and interview practice are ready for the next session.</p>
+          <div class="stat-grid">
+            <div class="stat-tile">
+              <strong id="homeStoryCount">0</strong>
+              <span>Stories and reflections captured</span>
+            </div>
+            <div class="stat-tile">
+              <strong id="homeConfidenceDelta">+0.0</strong>
+              <span>Confidence lift from your check-ins</span>
+            </div>
+            <div class="stat-tile">
+              <strong id="homeValuesCount">0</strong>
+              <span>Core values selected</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="home-section-title">Pick up where you left off</div>
+        <div class="quick-action">
+          <h3>Resume interview practice</h3>
+          <p id="homeSuggestedPrompt">We’ll start from your strongest challenge story and tighten the result.</p>
+          <div class="home-actions">
+            <button class="btn btn-primary" data-next="8">Open mock interview</button>
+            <button class="btn btn-ghost" data-next="7">Review my storybank</button>
+            <button class="btn btn-outline-gold" data-next="6">Refine my values</button>
+          </div>
+        </div>
+
+        <div class="home-section-title">Your best-self portrait</div>
+        <div class="card">
+          <p id="homeBestSelf"></p>
+        </div>
+
+        <div class="home-section-title">Themes showing up</div>
+        <div class="card">
+          <div class="theme-list" id="homeThemes"></div>
+        </div>
+
+        <div class="home-section-title">Recommended next steps</div>
+        <div class="mini-list" id="homeRecommendations"></div>
+
+        <div class="footer-nav">
+          <button class="btn btn-secondary" data-prev="8">Back</button>
+          <button class="btn btn-primary" data-next="3">Add another story</button>
         </div>
       </section>
 
@@ -455,6 +667,9 @@
 
   <script>
     const STORAGE_KEY = "career_ai_prototype_v1";
+    const TOTAL_SCREENS = 9;
+    const ONBOARDING_SCREENS = 8;
+    const SCREEN_WIDTH = 100 / TOTAL_SCREENS;
 
     const confidenceStatements = [
       "I can clearly describe my strengths to an employer",
@@ -526,26 +741,27 @@
     }
 
     function clampScreen(n) {
-      return Math.max(1, Math.min(8, n));
+      return Math.max(1, Math.min(TOTAL_SCREENS, n));
     }
 
     function goToScreen(n) {
       state.currentScreen = clampScreen(n);
       const index = state.currentScreen - 1;
-      document.getElementById("screenContainer").style.transform = `translateX(-${index * 12.5}%)`;
+      document.getElementById("screenContainer").style.transform = `translateX(-${index * SCREEN_WIDTH}%)`;
       document.querySelectorAll(".screen").forEach((el, i) => {
         el.classList.toggle("active", i === index);
       });
-      document.getElementById("progress").style.width = `${(state.currentScreen / 8) * 100}%`;
+      document.getElementById("progress").style.width = `${(Math.min(state.currentScreen, ONBOARDING_SCREENS) / ONBOARDING_SCREENS) * 100}%`;
       saveState();
-      if (state.currentScreen === 7 || state.currentScreen === 8) {
+      if (state.currentScreen === 7 || state.currentScreen === 8 || state.currentScreen === 9) {
         renderStorybank();
         renderBestSelf();
       }
-      if (state.currentScreen === 8) {
+      if (state.currentScreen === 8 || state.currentScreen === 9) {
         renderComparison();
         populateSuggestedStory();
       }
+      if (state.currentScreen === 9) renderHome();
     }
 
     function createScale(name, values, onPick) {
@@ -690,9 +906,38 @@
       return "Collaboration & Empathy";
     }
 
-    function renderStorybank() {
-      const out = document.getElementById("storybank");
-      if (!out) return;
+    function getDisplayName() {
+      return state.user.name || "Demo User";
+    }
+
+    function getUserInitials() {
+      return getDisplayName()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0].toUpperCase())
+        .join("") || "DU";
+    }
+
+    function getSuggestedStoryText() {
+      return state.cookieJar.find(Boolean) || state.impactMoments[0]?.impact || "your resilience story";
+    }
+
+    function averageScore(scores) {
+      return scores.reduce((sum, value) => sum + value, 0) / scores.length;
+    }
+
+    function getReflectionCount() {
+      return (
+        state.impactMoments.filter((moment) => Object.values(moment).some(Boolean)).length +
+        state.cookieJar.filter(Boolean).length +
+        state.zog.filter(Boolean).length +
+        (state.highestVersion ? 1 : 0) +
+        (state.roleModels ? 1 : 0)
+      );
+    }
+
+    function buildStoryCategories() {
       const categories = {
         "Leadership & Impact": [],
         "Resilience & Grit": [],
@@ -701,14 +946,97 @@
       };
 
       const sources = [
-        ...state.impactMoments.map((m) => `${m.impact} ${m.who} ${m.meaningful} ${m.strengths}`),
+        ...state.impactMoments.map((m) => `${m.impact} ${m.who} ${m.meaningful} ${m.strengths}`.trim()),
         ...state.cookieJar,
         ...state.zog,
         state.highestVersion,
         state.roleModels
       ].filter(Boolean);
 
-      sources.forEach((s) => categories[categorize(s)].push(s));
+      sources.forEach((source) => categories[categorize(source)].push(source));
+      return categories;
+    }
+
+    function getBestSelfText() {
+      const essence = state.selectedValues.length ? state.selectedValues.slice(0, 3).join(", ") : "integrity and growth";
+      const conditions = state.highestVersion || "there is trust, challenge, and room to learn quickly";
+      const impactSource = (state.impactMoments[0] && state.impactMoments[0].impact) || "helping others unlock confidence and momentum";
+      return `At my best, I am someone who embodies ${essence}. I thrive in environments where ${conditions.toLowerCase()}. I bring value by ${impactSource.toLowerCase()}.`;
+    }
+
+    function renderHome() {
+      const reflectionCount = getReflectionCount();
+      const confidenceDelta = averageScore(state.post) - averageScore(state.pre);
+      const topThemes = Object.entries(buildStoryCategories())
+        .filter(([, items]) => items.length)
+        .sort((a, b) => b[1].length - a[1].length);
+      const strongestTheme = topThemes[0]?.[0] || "Career story clarity";
+      const homeGreeting = document.getElementById("homeGreeting");
+      const firstName = getDisplayName().split(/\s+/)[0];
+
+      homeGreeting.textContent = `Welcome back, ${firstName}.`;
+      document.getElementById("homeSubhead").textContent = `${reflectionCount} reflections saved across your storybank and self-assessments.`;
+      document.getElementById("homeAvatar").textContent = getUserInitials();
+      document.getElementById("homeStoryCount").textContent = String(reflectionCount);
+      document.getElementById("homeConfidenceDelta").textContent = `${confidenceDelta >= 0 ? "+" : ""}${confidenceDelta.toFixed(1)}`;
+      document.getElementById("homeValuesCount").textContent = String(state.selectedValues.length);
+      document.getElementById("homeHeroTitle").textContent = `${strongestTheme} is emerging as your edge.`;
+      document.getElementById("homeHeroCopy").textContent = `You now have a clearer narrative built from ${Math.max(reflectionCount, 1)} saved reflections, ${state.selectedValues.length} core values, and a practice-ready storybank.`;
+      document.getElementById("homeSuggestedPrompt").textContent = `Suggested story to rehearse next: ${getSuggestedStoryText()}`;
+      document.getElementById("homeBestSelf").textContent = getBestSelfText();
+
+      const themesWrap = document.getElementById("homeThemes");
+      themesWrap.innerHTML = "";
+      if (!topThemes.length) {
+        themesWrap.innerHTML = "<p class='muted'>Complete a few more reflections to surface your strongest themes.</p>";
+      } else {
+        topThemes.slice(0, 4).forEach(([theme, items]) => {
+          const pill = document.createElement("div");
+          pill.className = "theme-pill";
+          pill.innerHTML = `<span>${theme}</span><span>${items.length}</span>`;
+          themesWrap.appendChild(pill);
+        });
+      }
+
+      const recommendations = [
+        state.selectedValues.length < 5
+          ? {
+              title: "Finish your top five values",
+              body: `You have ${state.selectedValues.length} selected so far. Locking in five makes your best-self summary and future role decisions sharper.`
+            }
+          : {
+              title: "Use your values as role filters",
+              body: `Your top values are ${state.selectedValues.slice(0, 3).join(", ")}. Use them to judge whether a role actually fits you.`
+            },
+        averageScore(state.post) < 4
+          ? {
+              title: "Do one more interview rep",
+              body: "Your post-assessment is improving, but another practice round will help the story feel more automatic."
+            }
+          : {
+              title: "Pressure-test with a harder question",
+              body: "Your confidence scores are strong enough to move beyond the basics and practice a more demanding behavioral prompt next."
+            },
+        {
+          title: "Turn one story into a reusable talking point",
+          body: `Your strongest prompt right now is "${getSuggestedStoryText()}". Convert it into a concise 60-second answer you can reuse in interviews and networking.`
+        }
+      ];
+
+      const recommendationList = document.getElementById("homeRecommendations");
+      recommendationList.innerHTML = "";
+      recommendations.forEach((item) => {
+        const card = document.createElement("div");
+        card.className = "mini-item";
+        card.innerHTML = `<strong>${item.title}</strong><p>${item.body}</p>`;
+        recommendationList.appendChild(card);
+      });
+    }
+
+    function renderStorybank() {
+      const out = document.getElementById("storybank");
+      if (!out) return;
+      const categories = buildStoryCategories();
 
       out.innerHTML = "";
       Object.entries(categories).forEach(([cat, items]) => {
@@ -725,10 +1053,7 @@
     function renderBestSelf() {
       const el = document.getElementById("bestSelf");
       if (!el) return;
-      const essence = state.selectedValues.length ? state.selectedValues.slice(0,3).join(", ") : "integrity and growth";
-      const conditions = state.highestVersion || "there is trust, challenge, and room to learn quickly";
-      const impactSource = (state.impactMoments[0] && state.impactMoments[0].impact) || "helping others unlock confidence and momentum";
-      el.textContent = `At my best, I am someone who embodies ${essence}. I thrive in environments where ${conditions.toLowerCase()}. I bring value by ${impactSource.toLowerCase()}.`;
+      el.textContent = getBestSelfText();
     }
 
     function renderComparison() {
@@ -751,8 +1076,7 @@
 
     function populateSuggestedStory() {
       const suggestion = document.getElementById("suggestedStory");
-      const first = state.cookieJar.find(Boolean) || (state.impactMoments[0] && state.impactMoments[0].impact) || "your resilience story";
-      suggestion.textContent = `Suggested story: ${first}`;
+      suggestion.textContent = `Suggested story: ${getSuggestedStoryText()}`;
     }
 
     function initStaticInputs() {
