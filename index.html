@@ -418,6 +418,14 @@
       color: var(--navy);
     }
 
+    .resume-output {
+      min-height: 180px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.84rem;
+      line-height: 1.5;
+      background: #fcfaf5;
+    }
+
     .hidden { display: none !important; }
 
     @media (max-width: 430px) {
@@ -656,6 +664,20 @@
         <div class="home-section-title">Recommended next steps</div>
         <div class="mini-list" id="homeRecommendations"></div>
 
+        <div class="home-section-title">Resume generator</div>
+        <div class="quick-action">
+          <h3>Build a resume draft from your storybank</h3>
+          <p>Generate a starter resume summary and impact bullets using your saved reflections.</p>
+          <label for="resumeRole">Target role</label>
+          <input id="resumeRole" type="text" placeholder="e.g., Product Manager" />
+          <div class="home-actions">
+            <button class="btn btn-primary" type="button" id="generateResumeBtn">Generate resume draft</button>
+            <button class="btn btn-ghost" type="button" id="copyResumeBtn">Copy draft</button>
+          </div>
+          <textarea id="resumeOutput" class="resume-output" placeholder="Your generated resume draft will appear here..."></textarea>
+          <p class="muted" id="resumeMsg"></p>
+        </div>
+
         <div class="footer-nav">
           <button class="btn btn-secondary" data-prev="8">Back</button>
           <button class="btn btn-primary" data-next="3">Add another story</button>
@@ -725,6 +747,8 @@
       highestVersion: "",
       selectedValues: ["Growth", "Integrity", "Meaningful Work"],
       roleModels: "",
+      resumeRole: "",
+      resumeOutput: "",
       willingness: "",
       nps: "",
       clarity: ""
@@ -977,6 +1001,48 @@
       return `At my best, I am someone who embodies ${essence}. I thrive in environments where ${conditions.toLowerCase()}. I bring value by ${impactSource.toLowerCase()}.`;
     }
 
+    function generateResumeDraft() {
+      const name = getDisplayName();
+      const role = (state.resumeRole || "Professional").trim();
+      const summary = getBestSelfText();
+
+      const impactBullets = state.impactMoments
+        .map((moment) => [moment.impact, moment.who, moment.meaningful].filter(Boolean).join(" "))
+        .filter(Boolean)
+        .slice(0, 3)
+        .map((bullet) => `- ${bullet}`);
+
+      const resilienceBullets = state.cookieJar
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((item) => `- ${item}`);
+
+      const valuesLine = state.selectedValues.length
+        ? state.selectedValues.join(", ")
+        : "Growth, Integrity, Collaboration";
+
+      const resumeText = [
+        `${name.toUpperCase()}`,
+        `${role}`,
+        "",
+        "PROFESSIONAL SUMMARY",
+        summary,
+        "",
+        "CORE VALUES",
+        valuesLine,
+        "",
+        "SELECTED IMPACT HIGHLIGHTS",
+        ...(impactBullets.length ? impactBullets : ["- Add an impact story from your reflections."]),
+        "",
+        "RESILIENCE & GROWTH",
+        ...(resilienceBullets.length ? resilienceBullets : ["- Add a resilience example from your cookie jar notes."])
+      ].join("\n");
+
+      state.resumeOutput = resumeText;
+      saveState();
+      return resumeText;
+    }
+
     function renderHome() {
       const reflectionCount = getReflectionCount();
       const confidenceDelta = averageScore(state.post) - averageScore(state.pre);
@@ -1133,6 +1199,21 @@
         state.clarity = e.target.value;
         saveState();
       });
+
+      const resumeRole = document.getElementById("resumeRole");
+      const resumeOutput = document.getElementById("resumeOutput");
+      resumeRole.value = state.resumeRole;
+      resumeOutput.value = state.resumeOutput;
+
+      resumeRole.addEventListener("input", (e) => {
+        state.resumeRole = e.target.value;
+        saveState();
+      });
+
+      resumeOutput.addEventListener("input", (e) => {
+        state.resumeOutput = e.target.value;
+        saveState();
+      });
     }
 
     function initAuth() {
@@ -1189,6 +1270,36 @@
         saveState();
         document.getElementById("finishMsg").textContent = "Saved! Thank you — your prototype responses are stored locally on this device.";
       });
+
+      document.getElementById("generateResumeBtn").addEventListener("click", () => {
+        const output = generateResumeDraft();
+        document.getElementById("resumeOutput").value = output;
+        document.getElementById("resumeMsg").textContent = "Draft generated from your latest onboarding reflections.";
+      });
+
+      document.getElementById("copyResumeBtn").addEventListener("click", async () => {
+        const resumeText = document.getElementById("resumeOutput").value.trim() || generateResumeDraft();
+        document.getElementById("resumeOutput").value = resumeText;
+        const msg = document.getElementById("resumeMsg");
+        try {
+          await navigator.clipboard.writeText(resumeText);
+          msg.textContent = "Copied resume draft to clipboard.";
+        } catch (e) {
+          msg.textContent = "Could not access clipboard. Select and copy the draft manually.";
+        }
+      });
+    }
+
+    function getInitialScreenFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const hash = (window.location.hash || "").replace("#", "").toLowerCase();
+      const jumpToHome = params.get("home") === "1" || params.get("screen") === "home" || hash === "home";
+      if (jumpToHome) return 9;
+      const requestedScreen = Number(params.get("screen"));
+      if (Number.isFinite(requestedScreen) && requestedScreen >= 1 && requestedScreen <= TOTAL_SCREENS) {
+        return requestedScreen;
+      }
+      return 1;
     }
 
     function boot() {
@@ -1202,7 +1313,7 @@
       renderCookieJar();
       renderZog();
       renderValues();
-      goToScreen(1);
+      goToScreen(getInitialScreenFromUrl());
     }
 
     boot();
