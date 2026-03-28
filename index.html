@@ -694,6 +694,15 @@
       "When have you made a meaningful impact on others?"
     ];
 
+    const zogPrefills = [
+      "Empathetic listener, thoughtful problem-solver, and calm under pressure.",
+      "During onboarding sessions and cross-functional launches, when I can connect people and keep the team focused on what matters most.",
+      "Turning ambiguous challenges into clear plans with practical next steps.",
+      "Collaborating with mission-driven teams, coaching others, and building systems that make work easier for everyone.",
+      "I help people find clarity and momentum when situations feel overwhelming.",
+      "I mentored newer teammates through high-pressure projects so they could deliver confidently and grow faster."
+    ];
+
     const defaultState = {
       currentScreen: 1,
       user: { name: "", email: "" },
@@ -712,7 +721,7 @@
         "Applied for internships after multiple rejections and finally secured one through persistence.",
         "Balanced school, work, and family responsibilities during a difficult semester."
       ],
-      zog: zogPrompts.map(() => ""),
+      zog: [...zogPrefills],
       highestVersion: "",
       selectedValues: ["Growth", "Integrity", "Meaningful Work"],
       roleModels: "",
@@ -728,8 +737,12 @@
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return { ...defaultState };
         const parsed = JSON.parse(raw);
+        const mergedZog = Array.from({ length: zogPrompts.length }, (_, idx) => {
+          const savedAnswer = parsed?.zog?.[idx];
+          return savedAnswer && savedAnswer.trim() ? savedAnswer : zogPrefills[idx];
+        });
         const { currentScreen: _ignoredCurrentScreen, ...savedState } = parsed;
-        return { ...defaultState, ...savedState, currentScreen: 1 };
+        return { ...defaultState, ...savedState, zog: mergedZog, currentScreen: 1 };
       } catch (e) {
         return { ...defaultState };
       }
