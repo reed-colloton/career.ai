@@ -419,11 +419,24 @@
     }
 
     .resume-output {
-      min-height: 180px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 0.84rem;
-      line-height: 1.5;
-      background: #fcfaf5;
+      min-height: 320px;
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 0.88rem;
+      line-height: 1.45;
+      background: #fff;
+      border: 1px solid #d9dfe9;
+      border-radius: 12px;
+      padding: 18px;
+      white-space: pre-wrap;
+      color: #1a2231;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      overflow-y: auto;
+    }
+
+    .resume-output:empty::before {
+      content: attr(data-placeholder);
+      color: #7d8594;
+      font-style: italic;
     }
 
     .hidden { display: none !important; }
@@ -674,7 +687,14 @@
             <button class="btn btn-primary" type="button" id="generateResumeBtn">Generate resume draft</button>
             <button class="btn btn-ghost" type="button" id="copyResumeBtn">Copy draft</button>
           </div>
-          <textarea id="resumeOutput" class="resume-output" placeholder="Your generated resume draft will appear here..."></textarea>
+          <div
+            id="resumeOutput"
+            class="resume-output"
+            contenteditable="true"
+            role="textbox"
+            aria-multiline="true"
+            data-placeholder="Your generated resume draft will appear here..."
+          ></div>
           <p class="muted" id="resumeMsg"></p>
         </div>
 
@@ -1004,38 +1024,45 @@
     function generateResumeDraft() {
       const name = getDisplayName();
       const role = (state.resumeRole || "Professional").trim();
-      const summary = getBestSelfText();
+      const summary = getBestSelfText().replace(/\s+/g, " ").trim();
+      const valuesLine = state.selectedValues.length
+        ? state.selectedValues.join(" • ")
+        : "Growth • Integrity • Collaboration";
 
       const impactBullets = state.impactMoments
-        .map((moment) => [moment.impact, moment.who, moment.meaningful].filter(Boolean).join(" "))
+        .map((moment) => [moment.impact, moment.who, moment.meaningful, moment.strengths].filter(Boolean).join(" "))
         .filter(Boolean)
-        .slice(0, 3)
-        .map((bullet) => `- ${bullet}`);
+        .slice(0, 4)
+        .map((bullet) => `• ${bullet}`);
 
       const resilienceBullets = state.cookieJar
         .filter(Boolean)
         .slice(0, 2)
-        .map((item) => `- ${item}`);
-
-      const valuesLine = state.selectedValues.length
-        ? state.selectedValues.join(", ")
-        : "Growth, Integrity, Collaboration";
+        .map((item) => `• ${item}`);
 
       const resumeText = [
         `${name.toUpperCase()}`,
-        `${role}`,
+        `${role} | Storybank-Informed Resume Draft`,
+        "City, ST • email@example.com • (555) 555-5555 • linkedin.com/in/yourname",
         "",
         "PROFESSIONAL SUMMARY",
         summary,
         "",
-        "CORE VALUES",
+        "CORE STRENGTHS",
         valuesLine,
         "",
-        "SELECTED IMPACT HIGHLIGHTS",
-        ...(impactBullets.length ? impactBullets : ["- Add an impact story from your reflections."]),
+        "EXPERIENCE HIGHLIGHTS",
+        ...(impactBullets.length ? impactBullets : ["• Add an impact story from your reflections."]),
         "",
-        "RESILIENCE & GROWTH",
-        ...(resilienceBullets.length ? resilienceBullets : ["- Add a resilience example from your cookie jar notes."])
+        "RESILIENCE & LEADERSHIP",
+        ...(resilienceBullets.length ? resilienceBullets : ["• Add a resilience example from your cookie jar notes."]),
+        "",
+        "EDUCATION",
+        "School Name — Degree, Major (Year)",
+        "",
+        "ADDITIONAL",
+        "Tools: Add relevant software / frameworks",
+        "Certifications: Add if applicable"
       ].join("\n");
 
       state.resumeOutput = resumeText;
@@ -1203,7 +1230,7 @@
       const resumeRole = document.getElementById("resumeRole");
       const resumeOutput = document.getElementById("resumeOutput");
       resumeRole.value = state.resumeRole;
-      resumeOutput.value = state.resumeOutput;
+      resumeOutput.textContent = state.resumeOutput;
 
       resumeRole.addEventListener("input", (e) => {
         state.resumeRole = e.target.value;
@@ -1211,7 +1238,7 @@
       });
 
       resumeOutput.addEventListener("input", (e) => {
-        state.resumeOutput = e.target.value;
+        state.resumeOutput = e.target.textContent;
         saveState();
       });
     }
@@ -1273,13 +1300,14 @@
 
       document.getElementById("generateResumeBtn").addEventListener("click", () => {
         const output = generateResumeDraft();
-        document.getElementById("resumeOutput").value = output;
+        document.getElementById("resumeOutput").textContent = output;
         document.getElementById("resumeMsg").textContent = "Draft generated from your latest onboarding reflections.";
       });
 
       document.getElementById("copyResumeBtn").addEventListener("click", async () => {
-        const resumeText = document.getElementById("resumeOutput").value.trim() || generateResumeDraft();
-        document.getElementById("resumeOutput").value = resumeText;
+        const resumeElement = document.getElementById("resumeOutput");
+        const resumeText = resumeElement.textContent.trim() || generateResumeDraft();
+        resumeElement.textContent = resumeText;
         const msg = document.getElementById("resumeMsg");
         try {
           await navigator.clipboard.writeText(resumeText);
