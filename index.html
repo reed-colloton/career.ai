@@ -439,6 +439,40 @@
       font-style: italic;
     }
 
+    .resume-onboarding {
+      border: 1px solid #e6dbc7;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+      background: #fffaf1;
+    }
+
+    .resume-lookup {
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px dashed #d7c6a6;
+      background: #fff;
+      margin-bottom: 12px;
+    }
+
+    .resume-chip-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .resume-chip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      background: #f1e7d6;
+      color: #6e5223;
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
     .hidden { display: none !important; }
 
     @media (max-width: 430px) {
@@ -681,6 +715,26 @@
         <div class="quick-action">
           <h3>Build a resume draft from your storybank</h3>
           <p>Generate a starter resume summary and impact bullets using your saved reflections.</p>
+          <div class="resume-onboarding hidden" id="resumeOnboarding">
+            <h3>Resume Info Onboarding</h3>
+            <p class="muted">We'll first look up likely public info (LinkedIn/personal website/school page), then you can correct education, employment, and skills before generating.</p>
+            <div class="resume-lookup">
+              <label for="resumeLookupName">Name to look up</label>
+              <input id="resumeLookupName" type="text" placeholder="e.g., Maya Thompson" />
+              <button class="btn btn-secondary" type="button" id="resumeLookupBtn">Look up public info</button>
+              <div class="resume-chip-wrap" id="resumeLookupLinks"></div>
+            </div>
+            <label for="resumeEducation">Education (confirm/correct)</label>
+            <textarea id="resumeEducation" placeholder="School — Degree, Major (Year)"></textarea>
+            <label for="resumeEmployment">Employment (confirm/correct)</label>
+            <textarea id="resumeEmployment" placeholder="Role, Company (Dates) + impact bullets"></textarea>
+            <label for="resumeSkills">Skills (confirm/correct)</label>
+            <textarea id="resumeSkills" placeholder="Key skills, tools, methods"></textarea>
+            <div class="home-actions">
+              <button class="btn btn-primary" type="button" id="completeResumeOnboardingBtn">Save info and generate</button>
+              <button class="btn btn-ghost" type="button" id="skipResumeOnboardingBtn">Cancel for now</button>
+            </div>
+          </div>
           <label for="resumeRole">Target role</label>
           <input id="resumeRole" type="text" placeholder="e.g., Product Manager" />
           <div class="home-actions">
@@ -768,6 +822,18 @@
       selectedValues: ["Growth", "Integrity", "Meaningful Work"],
       roleModels: "",
       resumeRole: "",
+      resumeInfoOnboardingDone: false,
+      resumeInfo: {
+        lookupName: "",
+        links: [
+          "https://linkedin.com/in/yourname",
+          "https://yourname.dev",
+          "https://school.edu/students/yourname"
+        ],
+        education: "State University — B.S. in Business Administration (2024)",
+        employment: "Customer Success Intern, Acme Tech (2023–2024)\n• Supported onboarding for 40+ SMB accounts\n• Created FAQ resources that reduced repeat support tickets",
+        skills: "Stakeholder communication, CRM (HubSpot), Data analysis, Project coordination"
+      },
       resumeOutput: "",
       willingness: "",
       nps: "",
@@ -786,7 +852,8 @@
           return savedAnswer && savedAnswer.trim() ? savedAnswer : zogPrefills[idx];
         });
         const { currentScreen: _ignoredCurrentScreen, ...savedState } = parsed;
-        return { ...defaultState, ...savedState, zog: mergedZog, currentScreen: 1 };
+        const mergedResumeInfo = { ...defaultState.resumeInfo, ...(savedState.resumeInfo || {}) };
+        return { ...defaultState, ...savedState, resumeInfo: mergedResumeInfo, zog: mergedZog, currentScreen: 1 };
       } catch (e) {
         return { ...defaultState };
       }
@@ -1040,6 +1107,15 @@
         .slice(0, 2)
         .map((item) => `• ${item}`);
 
+      const parsedEmployment = (state.resumeInfo.employment || "")
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => (line.startsWith("•") ? line : line));
+
+      const skillLine = (state.resumeInfo.skills || "").trim() || "Add your relevant skills";
+      const educationLine = (state.resumeInfo.education || "").trim() || "School Name — Degree, Major (Year)";
+
       const resumeText = [
         `${name.toUpperCase()}`,
         `${role} | Storybank-Informed Resume Draft`,
@@ -1054,14 +1130,17 @@
         "EXPERIENCE HIGHLIGHTS",
         ...(impactBullets.length ? impactBullets : ["• Add an impact story from your reflections."]),
         "",
+        "MOST RECENT EMPLOYMENT",
+        ...(parsedEmployment.length ? parsedEmployment : ["• Add your most recent role and accomplishments."]),
+        "",
         "RESILIENCE & LEADERSHIP",
         ...(resilienceBullets.length ? resilienceBullets : ["• Add a resilience example from your cookie jar notes."]),
         "",
         "EDUCATION",
-        "School Name — Degree, Major (Year)",
+        educationLine,
         "",
         "ADDITIONAL",
-        "Tools: Add relevant software / frameworks",
+        `Skills: ${skillLine}`,
         "Certifications: Add if applicable"
       ].join("\n");
 
@@ -1231,6 +1310,10 @@
       const resumeOutput = document.getElementById("resumeOutput");
       resumeRole.value = state.resumeRole;
       resumeOutput.textContent = state.resumeOutput;
+      document.getElementById("resumeLookupName").value = state.resumeInfo.lookupName || getDisplayName();
+      document.getElementById("resumeEducation").value = state.resumeInfo.education || "";
+      document.getElementById("resumeEmployment").value = state.resumeInfo.employment || "";
+      document.getElementById("resumeSkills").value = state.resumeInfo.skills || "";
 
       resumeRole.addEventListener("input", (e) => {
         state.resumeRole = e.target.value;
@@ -1239,6 +1322,26 @@
 
       resumeOutput.addEventListener("input", (e) => {
         state.resumeOutput = e.target.textContent;
+        saveState();
+      });
+
+      document.getElementById("resumeLookupName").addEventListener("input", (e) => {
+        state.resumeInfo.lookupName = e.target.value;
+        saveState();
+      });
+
+      document.getElementById("resumeEducation").addEventListener("input", (e) => {
+        state.resumeInfo.education = e.target.value;
+        saveState();
+      });
+
+      document.getElementById("resumeEmployment").addEventListener("input", (e) => {
+        state.resumeInfo.employment = e.target.value;
+        saveState();
+      });
+
+      document.getElementById("resumeSkills").addEventListener("input", (e) => {
+        state.resumeInfo.skills = e.target.value;
         saveState();
       });
     }
@@ -1299,6 +1402,11 @@
       });
 
       document.getElementById("generateResumeBtn").addEventListener("click", () => {
+        if (!state.resumeInfoOnboardingDone) {
+          document.getElementById("resumeOnboarding").classList.remove("hidden");
+          document.getElementById("resumeMsg").textContent = "Complete quick resume info onboarding first.";
+          return;
+        }
         const output = generateResumeDraft();
         document.getElementById("resumeOutput").textContent = output;
         document.getElementById("resumeMsg").textContent = "Draft generated from your latest onboarding reflections.";
@@ -1315,6 +1423,56 @@
         } catch (e) {
           msg.textContent = "Could not access clipboard. Select and copy the draft manually.";
         }
+      });
+
+      document.getElementById("resumeLookupBtn").addEventListener("click", () => {
+        const lookupName = (state.resumeInfo.lookupName || getDisplayName()).trim() || "Demo User";
+        const slug = lookupName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+        state.resumeInfo.links = [
+          `https://linkedin.com/in/${slug}`,
+          `https://${slug}.com`,
+          `https://school.edu/directory/${slug}`
+        ];
+        if (!state.resumeInfo.education.trim()) {
+          state.resumeInfo.education = "State University — B.S. in Business Administration (2024)";
+        }
+        if (!state.resumeInfo.employment.trim()) {
+          state.resumeInfo.employment = "Customer Success Intern, Acme Tech (2023–2024)\n• Supported onboarding for 40+ SMB accounts\n• Created FAQ resources that reduced repeat support tickets";
+        }
+        if (!state.resumeInfo.skills.trim()) {
+          state.resumeInfo.skills = "Stakeholder communication, CRM (HubSpot), Data analysis, Project coordination";
+        }
+        saveState();
+        renderResumeLookupResults();
+        document.getElementById("resumeEducation").value = state.resumeInfo.education;
+        document.getElementById("resumeEmployment").value = state.resumeInfo.employment;
+        document.getElementById("resumeSkills").value = state.resumeInfo.skills;
+        document.getElementById("resumeMsg").textContent = "Pulled likely public info. Please correct anything inaccurate before generating.";
+      });
+
+      document.getElementById("completeResumeOnboardingBtn").addEventListener("click", () => {
+        state.resumeInfoOnboardingDone = true;
+        saveState();
+        document.getElementById("resumeOnboarding").classList.add("hidden");
+        const output = generateResumeDraft();
+        document.getElementById("resumeOutput").textContent = output;
+        document.getElementById("resumeMsg").textContent = "Onboarding complete. Resume draft generated from your confirmed info.";
+      });
+
+      document.getElementById("skipResumeOnboardingBtn").addEventListener("click", () => {
+        document.getElementById("resumeOnboarding").classList.add("hidden");
+        document.getElementById("resumeMsg").textContent = "You can reopen onboarding by clicking Generate resume draft again.";
+      });
+    }
+
+    function renderResumeLookupResults() {
+      const linksWrap = document.getElementById("resumeLookupLinks");
+      linksWrap.innerHTML = "";
+      state.resumeInfo.links.forEach((link) => {
+        const chip = document.createElement("span");
+        chip.className = "resume-chip";
+        chip.textContent = link;
+        linksWrap.appendChild(chip);
       });
     }
 
@@ -1341,6 +1499,7 @@
       renderCookieJar();
       renderZog();
       renderValues();
+      renderResumeLookupResults();
       goToScreen(getInitialScreenFromUrl());
     }
 
